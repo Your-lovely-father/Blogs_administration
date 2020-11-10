@@ -29,7 +29,6 @@
                 :header-cell-style="{color: '#515a6e', fontSize: '12px'}"
             >
               <el-table-column
-                  fixed
                   prop="linkName"
                   label="友链名称"
               >

@@ -53,7 +53,6 @@
                 :header-cell-style="{color: '#515a6e', fontSize: '12px'}"
             >
               <el-table-column
-                  fixed
                   prop="title"
                   label="标题"
               >
@@ -329,9 +328,6 @@ export default {
   height: 32px;
   line-height: 32px;
 }
-.el-button--text{
-  margin-left: 10px;
-}
 @media (max-width: 790px) {
   .search{
     display: flex;
@@ -346,6 +342,9 @@ export default {
   .form_box{
     display: flex;
     flex-wrap: wrap;
+  }
+  .el-button--text{
+    margin-left: 10px;
   }
 }
 @media (max-width: 860px) {
@@ -372,6 +371,21 @@ export default {
   }
   .zujian>>>.el-form-item__content{
     margin-left: 120px!important;
+  }
+  .el-button--text{
+    margin-left: 10px;
+  }
+}
+</style>
+<style>
+@media (max-width: 455px) {
+  .el-message-box{
+    width: 350px !important;
+  }
+}
+@media (max-width: 380px) {
+  .el-message-box{
+    width: 330px !important;
   }
 }
 </style>

@@ -28,6 +28,7 @@
               <el-table-column
                   prop="dateTime"
                   label="时间"
+                  :show-overflow-tooltip="true"
               >
               </el-table-column>
               <el-table-column

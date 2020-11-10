@@ -43,6 +43,7 @@
               >
               </el-table-column>
               <el-table-column
+                  :show-overflow-tooltip="true"
                   prop="dateTime"
                   label="更新时间"
               >
@@ -222,6 +223,7 @@
               >
               </el-table-column>
               <el-table-column
+                  :show-overflow-tooltip="true"
                   prop="dateTime"
                   label="时间"
               >

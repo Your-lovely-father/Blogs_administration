@@ -20,7 +20,6 @@
                 :header-cell-style="{color: '#515a6e', fontSize: '12px'}"
             >
               <el-table-column
-                  width="300px"
                   prop="title"
                   label="标题"
               >
@@ -28,12 +27,10 @@
               <el-table-column
                   prop="content"
                   label="内容"
-                  width="843px"
               >
               </el-table-column>
               <el-table-column
                   fixed="right"
-                  width="150px"
                   label="操作"
               >
                 <template slot-scope="scope">
