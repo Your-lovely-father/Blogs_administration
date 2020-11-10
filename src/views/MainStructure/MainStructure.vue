@@ -1,0 +1,489 @@
+<template>
+    <div class="home">
+        <el-container class="home-container">
+            <!--       侧边栏区域        -->
+            <el-aside :width="isCollapsed ? '64px': '200px'">
+                <div class="logo">
+                    <div class="logo_img">
+                        <img src="../../assets/img/logo.png" alt="">
+                    </div>
+                    <div class="logo_text" v-show="isLogoText">
+                        王晓冷
+                    </div>
+                </div>
+                <!--       导航区         -->
+                <el-menu
+                        background-color="#304156"
+                        text-color="#fff"
+                        active-text-color="#409EFF"
+                        :unique-opened="true"
+                        :collapse="isCollapsed"
+                        :collapse-transition="false"
+                        :router="true"
+                        :default-active="headIndex"
+                >
+                    <!--  主菜单  -->
+                    <el-menu-item :index="'/'+ item.path" v-for="item in list" :key="item.id"   @click="addTab(item)">
+                        <i :class="icon[item.id]" id="icon"></i>
+                        <span class="text">{{item.name}}</span>
+                    </el-menu-item>
+
+                    <el-submenu :index="'/'+ item.path" v-for="item in navList" :key="item.id" >
+                    <!--     一级菜单模板区 -->
+                    <template slot="title">
+                        <i :class="icon[item.id]" id="icon"></i>
+                        <span class="text">{{item.name}}</span>
+                    </template>
+                    <!--       二级菜单区域      -->
+                    <el-menu-item :index=" '/'+ item1.path" v-for="item1 in item.children" :key="item1.id"   @click="addTab(item1)">
+                        <template slot="title">
+                            <i :class="childrenIcon[item1.id]" id="icon"></i>
+                            <span class="text">{{item1.name}}</span>
+                        </template>
+                    </el-menu-item>
+                </el-submenu>
+                </el-menu>
+
+            </el-aside>
+            <el-container>
+                <!--       头部区域         -->
+                <el-header>
+                    <div class="header">
+                        <div class="header-left">
+                            <span class="iconfont icon-shouqi" @click="up" style="display: block" v-if="flag"></span>
+                            <span class="iconfont icon-zhankai" @click="up" style="display: block" v-else></span>
+                            <span class="iconfont icon-icon-1" @click="refresh"></span>
+                        </div>
+                        <div class="header-right" @mousemove="move" @mouseleave="leave">
+                            <el-dropdown>
+                                <ul class="exit">
+                                    <li>
+                                        <p class="p_img">
+                                            <img src="../../assets/img/logo.png"
+                                                 alt="">
+                                        </p>
+                                        <p class="name_title">
+                                            王志远
+                                        </p>
+                                        <p class="icon_top_bottom">
+                                            <span class="el-icon-caret-top" v-if="isShowIcon"></span>
+                                            <span class="el-icon-caret-bottom" v-else></span>
+                                        </p>
+                                        <ol class="exit_btn">
+                                            <li>
+                                                <el-dropdown-menu slot="dropdown">
+                                                    <el-dropdown-item class="exit_Btn">
+                                                        <p @click="updPass()">修改密码</p>
+                                                    </el-dropdown-item>
+                                                    <el-dropdown-item class="exit_Btn">
+                                                        <p @click="starTtab()">启动页签</p>
+                                                    </el-dropdown-item>
+                                                    <el-dropdown-item class="exit_Btn">
+                                                        <p @click="tab()">关闭页签</p>
+                                                    </el-dropdown-item>
+                                                    <el-dropdown-item class="exit_Btn">
+                                                        <p @click="exit()">退出</p>
+                                                    </el-dropdown-item>
+                                                </el-dropdown-menu>
+                                            </li>
+                                        </ol>
+                                    </li>
+                                </ul>
+                            </el-dropdown>
+                        </div>
+                    </div>
+                </el-header>
+                <!--         面包屑导航           -->
+                <div class="crumbs" v-show="isTab">
+                    <el-tabs v-model="editableTabsValue" type="border-card"  closable @tab-remove="removeTab" @tab-click="goRouter">
+                        <el-tab-pane
+                                v-for="(item) in editableTabs"
+                                :key="item.id"
+                                :label="item.name"
+                                :name="item.path"
+                        >
+                        <!-- <div class="tab"><span>{{item.name}}</span></div> -->
+                        </el-tab-pane>
+                    </el-tabs>
+                </div>
+                <!--       主体区域         -->
+                <el-main>
+                    <transition name="fade-transform" mode="out-in">
+                        <router-view></router-view>
+                    </transition>
+                </el-main>
+            </el-container>
+        </el-container>
+        <myPassword :isShowPassword.sync="isShowPassword"/>
+        <myExit :isExit.sync="isExit"/>
+    </div>
+</template>
+
+<script>
+    import  myPassword from './ChangePassword/ChangePassword'
+    import myExit from './Exit/Exit'
+    export default {
+        name: "Home",
+        components:{
+            myPassword,
+            myExit,
+
+        },
+        data() {
+            return {
+                //折叠
+                isCollapsed: false,
+                //logo字隐藏切换
+                isLogoText: true,
+                //侧边栏展开收齐按钮
+                flag: true,
+                //侧边栏数据
+                isShowIcon: false,//退出图标切换
+                isShowPassword: false,//修改密码
+                isExit:false,//退出
+                isTab:true,//关闭面包屑导航
+                editableTabsValue: 'browse', //面包屑导航
+                editableTabs: [{ //页签
+                    id: "1",
+                    name: "总览",
+                    path: "browse",
+                }],
+                //侧边栏
+                list: [
+                    {
+                        id: '1',
+                        name: '总览',
+                        path: 'browse'
+                    }
+                ],
+                navList: [
+                     {
+                        id: '2',
+                        name: '文章管理',
+                        path: 'article',
+                        children: [
+                            {
+                                id: '7',
+                                name: '文章发布',
+                                path: 'articleRelease'
+                            },
+                            {
+                                id: '8',
+                                name: '详情发布',
+                                path: 'detailsRelease'
+                            },
+                        ]
+                    },
+                    {
+                        id: '3',
+                        name: '留言管理',
+                        path: 'message',
+                        children: [
+                            {
+                                id: '9',
+                                name: '留言板',
+                                path: 'messageVersion'
+                            },
+                        ]
+                    },
+                    {
+                      id: '4',
+                      name: '生活管理',
+                      path: 'life',
+                      children: [
+                        {
+                          id: '10',
+                          name: '生活发布',
+                          path: 'lifeRelease'
+                        },
+                      ]
+                    },
+                    {
+                      id: '5',
+                      name: '关于管理',
+                      path: 'about',
+                      children: [
+                        {
+                          id: '11',
+                          name: '关于发布',
+                          path: 'aboutRelease'
+                        },
+                      ]
+                    },
+                    {
+                      id: '6',
+                      name: '友链管理',
+                      path: 'link',
+                      children: [
+                        {
+                          id: '12',
+                          name: '友链审核',
+                          path: 'linkAudit'
+                        },
+                      ]
+                    },
+
+                ],
+                //一级侧边栏字体图标
+                icon: {
+                  '1': 'iconfont icon-tongji3',
+                  '4': 'iconfont icon-kehuguanli',
+                  '3': 'iconfont icon-genjin',
+                  '2': 'iconfont icon-rizhiguanli',
+                  '5': 'iconfont icon-zuzhijiagou',
+                  '6': 'iconfont icon-quanxianguanli31',
+                },
+                //二级侧边栏菜单
+                childrenIcon: {
+                  '7': 'iconfont icon-yuangongguanlizhengjianxueshengzhenggongzuozheng',
+                  '8': 'iconfont icon-yuangongguanlizhengjianxueshengzhenggongzuozheng',
+                  '9': 'iconfont icon-yuangongguanlizhengjianxueshengzhenggongzuozheng',
+                  '10': 'iconfont icon-yuangongguanlizhengjianxueshengzhenggongzuozheng',
+                  '11': 'iconfont icon-yuangongguanlizhengjianxueshengzhenggongzuozheng',
+                  '12': 'iconfont icon-yuangongguanlizhengjianxueshengzhenggongzuozheng',
+                },
+                headIndex: '/browse'
+            }
+        },
+        methods: {
+            goRouter(e) {
+                let path = '/'+this.editableTabs[e.index].path;
+                this.headIndex = path;
+                this.$router.push(path)
+            },
+            exit() {
+                this.isExit=true
+            },
+            up() {
+                this.isCollapsed = !this.isCollapsed;
+                this.isLogoText = !this.isLogoText;
+                this.flag = !this.flag
+            },
+            move() {
+                this.isShowIcon = true
+            },
+            leave() {
+                this.isShowIcon = false
+            },
+            updPass(){
+                this.isShowPassword=true
+            },
+            refresh(){
+                this.$router.go(0)
+            },
+            addTab(targetName) { //添加
+                let show = false;
+                this.editableTabs.forEach(item => {
+                    if(item.name  == targetName.name) {
+                        this.editableTabsValue = targetName.path;
+                        show = true
+                    }
+                });
+                if(show) { return}
+                this.editableTabs.push({
+                    id: targetName.id,
+                    name: targetName.name,
+                    path: targetName.path,
+                });
+                this.editableTabsValue = targetName.path;
+            },
+            removeTab(targetName) { //删除
+                if (this.editableTabs.length == 1) {
+                    return
+                }
+                this.editableTabs.forEach((item,index) => {
+                    if(item.path  == targetName) {
+                        if(index != 0){
+                            this.editableTabs.splice(index,1)
+                        }else{
+                            return
+                        }
+                        if (this.editableTabs.length == 0) {
+                            return
+                        }
+                        if(index == 0){
+                            let path = '/'+this.editableTabs[0].path;
+                            this.headIndex = path;
+                            this.editableTabsValue = this.editableTabs[0].path;
+                            this.$router.push(path)
+                        }else{
+                            let path = '/'+this.editableTabs[index-1].path;
+                            this.headIndex = path;
+                            this.editableTabsValue = this.editableTabs[index-1].path;
+                            this.$router.push(path)
+
+                        }
+                    }
+                });
+            },
+            starTtab(){ //启动
+                this.isTab=true;
+            },
+            tab(){ //关闭页签
+                this.isTab=false;
+            }
+        },
+        mounted() {
+
+        }
+    }
+</script>
+
+<style scoped>
+    .home>>>#tab-browse > span{
+        display: none;
+    }
+    .home>>>#tab-browse:hover{
+        padding: 0 20px;
+    }
+    .home {
+        width: 100%;
+        height: 100%;
+    }
+
+    .el-header {
+        background: #fff;
+        box-shadow: 0 1px 4px rgba(0, 21, 41, .08);
+    }
+
+    .el-aside {
+        background-color: #304156;
+    }
+
+    .home>>>.el-main {
+        background-color: #f0f2f5;
+        padding: 0 !important;
+    }
+
+    .el-menu {
+        border-right: none;
+    }
+
+    .el-submenu__icon-arrow {
+        display: none;
+    }
+
+    .home-container {
+        height: 100% !important;
+    }
+
+    .header {
+        width: 100%;
+        height: 60px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .icon-shouqi {
+        cursor: pointer;
+    }
+    .icon-icon-1{
+        cursor: pointer;
+        margin-left: 50px;
+        font-size: 18px;
+    }
+    .icon-zhankai {
+        cursor: pointer;
+    }
+
+    .header-right {
+        cursor: pointer;
+    }
+
+    .logo {
+        width: 100%;
+        height: 60px;
+        display: flex;
+        background: #2b2f3a;
+        color: #fff;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .logo_img {
+        width: 32px;
+        height: 32px;
+    }
+
+    .logo_img > img {
+        width: 100%;
+        height: 32px;
+    }
+
+    .logo_text {
+        margin-left: 20px;
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    .header-left {
+        display: flex;
+        height: 60px;
+        align-items: center;
+    }
+
+    /* #icon {
+        font-weight: 400;
+        color: #ffffff;
+    } */
+
+    .text {
+        margin-left: 15px;
+    }
+
+    .exit {
+        height: 60px;
+    }
+
+    .exit > li {
+        display: flex;
+        height: 60px;
+        align-items: center;
+    }
+
+    .p_img {
+        width: 40px;
+    }
+
+    .p_img > img {
+        width: 100%;
+        border-radius: 3px;
+    }
+
+    .name_title {
+        margin-left: 10px;
+    }
+
+    .icon_top_bottom {
+        margin-left: 5px;
+    }
+
+    .exit_Btn {
+        width: 110px;
+        text-align: center;
+    }
+
+    .crumbs {
+        width: 100%;
+    }
+    .crumbs>>>.el-tabs__nav-prev{
+        margin-left: 8px;
+    }
+    .crumbs>>>.el-tabs__nav-next{
+        margin-right: 8px;
+    }
+    .crumbs>>>.el-tabs__header{
+        margin: 0;
+    }
+    .crumbs>>>.el-tabs__nav-wrap.is-scrollable {
+        padding: 0 30px;
+        box-sizing: border-box;
+    }
+    .crumbs>>>.el-tabs--border-card>.el-tabs__header .el-tabs__item{
+        border-right: 1px #eee solid;
+    }
+    .crumbs>>>.el-tabs--border-card>.el-tabs__content{
+        padding: 0.25px;
+    }
+</style>
