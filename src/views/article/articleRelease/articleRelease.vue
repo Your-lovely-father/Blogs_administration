@@ -1,5 +1,5 @@
 <template>
-  <div class="administration">
+  <div class="administration">	  
     <el-card class="box-card">
       <div slot="header" class="clearfix">
         <el-form :model="queryParams" ref="queryForm" :inline="true">
