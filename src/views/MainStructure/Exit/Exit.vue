@@ -41,6 +41,7 @@
             },
             confirm() {
                 this.$emit("update:isExit", false);
+                window.localStorage.removeItem('token')
                 this.$router.push('/login');
             }
         },

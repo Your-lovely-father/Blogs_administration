@@ -96,19 +96,19 @@ const router = new VueRouter({
 });
 
 //路由守卫
-// router.beforeEach((to, from, next) => {
-//     // to 将要进入的路由
-//     // from 代表从那个路径跳转而来
-//     // next 放行
-//     if (to.path === '/login') {
-//         return next()
-//     } else {
-//         const token = store.state.access_token;
-//         if (!token) {
-//             return next('/login');
-//         } else {
-//             next()
-//         }
-//     }
-// });
+router.beforeEach((to, from, next) => {
+    // to 将要进入的路由
+    // from 代表从那个路径跳转而来
+    // next 放行
+    if (to.path === '/login') {
+        return next()
+    } else {
+        let token=window.localStorage.getItem('token')
+        if (!token) {
+            return next('/login');
+        } else {
+            next()
+        }
+    }
+});
 export default router

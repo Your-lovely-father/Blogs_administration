@@ -23,19 +23,23 @@
                   prop="content"
                   label="内容"
               >
+			  <template slot-scope="scope">
+				  <span v-html="scope.row.content" class="neirong"></span>
+			  </template>
               </el-table-column>
-              <el-table-column
-                  prop="dateTime"
-                  label="时间"
-                  :show-overflow-tooltip="true"
-              >
-              </el-table-column>
+			  <el-table-column
+			      prop="create_time"
+			      label="时间"
+				  :show-overflow-tooltip="true"
+			  >
+			  </el-table-column>
+			  
               <el-table-column
                   fixed="right"
                   label="操作"
               >
                 <template slot-scope="scope">
-                  <el-button @click="delClick(scope.row.coinId)" type="text" size="small">删除</el-button>
+                  <el-button @click="delClick(scope.row._id)" type="text" size="small">删除</el-button>
                 </template>
               </el-table-column>
             </el-table>
@@ -59,7 +63,7 @@
           <div class="form_box">
             <el-form ref="form" :model="form" label-width="180px">
               <quill-editor
-                  v-model="content"
+                  v-model="form.content"
                   ref="myQuillEditor"
                   :options="editorOption"
                   @blur="onEditorBlur($event)" @focus="onEditorFocus($event)"
@@ -79,7 +83,7 @@
 </template>
 
 <script>
-
+import Api from '../../../api/lifeRelease.js'
 export default {
   data() {
     return {
@@ -104,6 +108,14 @@ export default {
   methods: {
     addCurrency() {
       this.dialogFormVisible = false
+	  Api.addLife(this.form).then((res) => {
+	    if (res.code ==0) {
+	      this.$message.success(res.message);
+	      this.administrationList();
+	    } else {
+	      this.$message.error(res.message);
+	    }
+	  });
     },
     onEditorBlur() {//失去焦点事件
     },
@@ -111,23 +123,36 @@ export default {
     },
     onEditorChange() {//内容改变事件
     },
-    delClick(row) {//删除
-      this.$confirm('此操作将永久删除该条数据, 是否继续?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        //.....
-      }).catch(() => {
-        this.$message({
-          type: 'info',
-          message: '已取消删除'
-        })
-      })
-    },
+   //删除
+   delClick(id) {
+     this.$confirm("此操作将永久删除该文件, 是否继续?", "提示", {
+       confirmButtonText: "确定",
+       cancelButtonText: "取消",
+       type: "warning",
+     })
+       .then(() => {
+         Api.delLife(id).then((res) => {
+           if (res.code ==0) {
+             this.$message.success(res.message);
+             this.administrationList();
+           } else {
+             this.$message.error(res.message);
+           }
+         });
+       })
+       .catch(() => {
+         this.$message({
+           type: "info",
+           message: "已取消删除",
+         });
+       });
+   },
     //列表
     administrationList() {
-      //....
+		Api.getLife().then((res) => {
+		  this.CurrencyInfo = res.data.list;
+		  this.total = res.data.count;
+		});
     },
   },
   created() {//初始化数据
@@ -211,4 +236,10 @@ export default {
     margin-left: 120px!important;
   }
 }
+</style>
+<style>
+	.neirong p img{
+		width: 100px !important;
+		height: 100px !important;
+	}
 </style>

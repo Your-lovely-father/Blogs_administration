@@ -9,8 +9,6 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 
-//全局的自定义指令
-import './utils/custom'
 
 //清楚默认样式
 import './assets/css/common.css'

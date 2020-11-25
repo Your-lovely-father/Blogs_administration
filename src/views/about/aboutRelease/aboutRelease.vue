@@ -20,7 +20,7 @@
                 :header-cell-style="{color: '#515a6e', fontSize: '12px'}"
             >
               <el-table-column
-                  prop="title"
+                  prop="name"
                   label="标题"
               >
               </el-table-column>
@@ -28,13 +28,16 @@
                   prop="content"
                   label="内容"
               >
+			  <template slot-scope="scope">
+			    <span v-html="scope.row.content"></span>
+			  </template>
               </el-table-column>
               <el-table-column
                   fixed="right"
                   label="操作"
               >
                 <template slot-scope="scope">
-                  <el-button @click="delClick(scope.row.coinId)" type="text" size="small">删除</el-button>
+                  <el-button @click="delClick(scope.row._id)" type="text" size="small">删除</el-button>
                 </template>
               </el-table-column>
             </el-table>
@@ -59,11 +62,10 @@
             <el-form ref="form" :model="form" label-width="180px">
 
               <el-form-item label="标题">
-                <el-input v-model="form.title" placeholder="请输入标题"/>
+                <el-input v-model="form.name" placeholder="请输入标题"/>
               </el-form-item>
-
               <quill-editor
-                  v-model="content"
+                  v-model="form.content"
                   ref="myQuillEditor"
                   :options="editorOption"
                   @blur="onEditorBlur($event)" @focus="onEditorFocus($event)"
@@ -83,7 +85,7 @@
 </template>
 
 <script>
-
+import Api from "../../../api/aboutRelease.js";
 export default {
   data() {
     return {
@@ -92,22 +94,24 @@ export default {
         pageNum: 1,
         pageSize: 10
       },
-      CurrencyInfo: [
-        {
-          title: 'webstrom',
-          content: 'webstrom',
-        }
-      ],
+      CurrencyInfo: [],
       form: {},
       dialogTableVisible: false,
       dialogFormVisible: false,
-      content: null,
       editorOption: {}
     }
   },
   methods: {
     addCurrency() {
       this.dialogFormVisible = false
+	  Api.addAbout(this.form).then((res) => {
+	    if (res.code ==0) {
+	      this.$message.success(res.message);
+	      this.administrationList();
+	    } else {
+	      this.$message.error(res.message);
+	    }
+	  });
     },
     onEditorBlur() {//失去焦点事件
     },
@@ -115,23 +119,35 @@ export default {
     },
     onEditorChange() {//内容改变事件
     },
-    delClick(row) {//删除
-      this.$confirm('此操作将永久删除该条数据, 是否继续?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        //.....
-      }).catch(() => {
-        this.$message({
-          type: 'info',
-          message: '已取消删除'
-        })
+    delClick(id) {
+      this.$confirm("此操作将永久删除该文件, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
       })
+        .then(() => {
+          Api.delAbout(id).then((res) => {
+            if (res.code ==0) {
+              this.$message.success(res.message);
+              this.administrationList();
+            } else {
+              this.$message.error(res.message);
+            }
+          });
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消删除",
+          });
+        });
     },
     //列表
     administrationList() {
-      //....
+     Api.getAbout().then((res) => {
+       this.CurrencyInfo = res.data.list;
+       this.total = res.data.count;
+     });
     },
   },
   created() {//初始化数据

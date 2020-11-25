@@ -58,40 +58,30 @@
               >
               </el-table-column>
               <el-table-column
-                  prop="label"
+                  prop="tags"
                   label="标签"
               >
               </el-table-column>
               <el-table-column
-                  prop="illustration"
+                  prop="img_url"
                   label="配图"
               >
                 <template slot-scope="scope">
-                  <img :src="scope.row.illustration" alt="图片加载失败">
+                  <img :src="scope.row.img_url" alt="图片加载失败" style="width: 100px;height: 100px;">
                 </template>
               </el-table-column>
               <el-table-column
-                  prop="describe"
+                  prop="desc"
                   label="描述"
               >
               </el-table-column>
               <el-table-column
-                  prop="original"
+                  prop="origin"
                   label="原创"
               >
                 <template slot-scope="scope">
-                  <span>{{scope.row.original==1?'原创':'转载'}}</span>
+                  <span>{{scope.row.origin==1?'原创':'转载'}}</span>
                 </template>
-              </el-table-column>
-              <el-table-column
-                  prop="browse"
-                  label="浏览量"
-              >
-              </el-table-column>
-              <el-table-column
-                  prop="comments"
-                  label="评论/条"
-              >
               </el-table-column>
               <el-table-column
                   prop="top"
@@ -102,7 +92,7 @@
                 </template>
               </el-table-column>
               <el-table-column
-                  prop="dateTime"
+                  prop="create_time"
                   label="时间"
                   :show-overflow-tooltip="true"
               >
@@ -112,9 +102,9 @@
                   label="操作"
               >
                 <template slot-scope="scope">
-                  <el-button @click="seeClick(scope.row.coinId)" type="text" size="small">查看</el-button>
-                  <el-button @click="delClick(scope.row.coinId)" type="text" size="small">删除</el-button>
-                  <el-button @click="updClick(scope.row.coinId)" type="text" size="small">修改</el-button>
+                  <el-button @click="delClick(scope.row._id)" type="text" size="small">删除</el-button>
+				  <el-button @click="seeClick(scope.row._id)" type="text" size="small">详情操作</el-button>
+                  <el-button @click="updClick(scope.row)" type="text" size="small">是否置顶</el-button>
                 </template>
               </el-table-column>
             </el-table>
@@ -145,14 +135,14 @@
                 </el-col>
                 <el-col :span="12">
                   <el-form-item label="标签">
-                    <el-input v-model="form.label" placeholder="请输入标签"/>
+                    <el-input v-model="form.tags" placeholder="请输入标签"/>
                   </el-form-item>
                 </el-col>
               </el-row>
               <el-row>
                 <el-col :span="12">
                   <el-form-item label="是否置顶">
-                    <el-select v-model="form.stick" placeholder="请选择">
+                    <el-select v-model="form.top" placeholder="请选择">
                       <el-option v-for="dict in placedTopList" :key="dict.value" :label="dict.label"
                                  :value="dict.value"></el-option>
                     </el-select>
@@ -160,7 +150,7 @@
                 </el-col>
                 <el-col :span="12">
                   <el-form-item label="原创/转载">
-                    <el-select v-model="form.reprint" placeholder="请选择">
+                    <el-select v-model="form.origin" placeholder="请选择">
                       <el-option v-for="dict in reprintList" :key="dict.value" :label="dict.label"
                                  :value="dict.value"></el-option>
                     </el-select>
@@ -168,19 +158,10 @@
                 </el-col>
               </el-row>
               <el-form-item label="文章描述">
-                <el-input v-model="form.describe" type="textarea" placeholder="请输入文章描述"></el-input>
+                <el-input v-model="form.desc" type="textarea" placeholder="请输入文章描述"></el-input>
               </el-form-item>
               <el-form-item label="文章配图">
-                <el-upload
-                    action="https://jsonplaceholder.typicode.com/posts/"
-                    list-type="picture-card"
-                    :on-preview="handlePictureCardPreview"
-                    :on-remove="handleRemove">
-                  <i class="el-icon-plus"></i>
-                </el-upload>
-                <el-dialog :visible.sync="dialogVisible">
-                  <img width="100%" :src="dialogImageUrl" alt="">
-                </el-dialog>
+					<el-input v-model="form.img_url" placeholder="请输入图片链接"/>
               </el-form-item>
             </el-form>
           </div>
@@ -196,7 +177,7 @@
 </template>
 
 <script>
-
+import Api from "../../../api/articleRelease.js";
 export default {
   data() {
     return {
@@ -207,19 +188,7 @@ export default {
         pageNum: 1,
         pageSize: 10
       },
-      CurrencyInfo: [
-        {
-          title:'webstrom',
-          label:'webstrom',
-          illustration:'',
-          describe:'describe真好用',
-          original:1,
-          browse:99,
-          comments:99,
-          top:1,
-          dateTime:'2020-11-23 13:29:01',
-        }
-      ],
+      CurrencyInfo: [],
       form: {},
       dialogTableVisible: false,
       dialogFormVisible: false,
@@ -240,14 +209,42 @@ export default {
     }
   },
   methods: {
-    seeClick(){
+    seeClick(row){
       this.$router.push('/detailsRelease')
+	  this.$store.commit('detailsFn',row)
+	  
     },
-    updClick(){
-
+    updClick(row){
+		let {_id,top} = row;
+		var data={
+			id:_id,
+			top:''
+		}
+		if(top == 1){
+			data.top=0
+		}else{
+			data.top=1
+		}
+		Api.updArticle(data).then((res) => {
+		  if (res.code ==0) {
+		    this.$message.success(res.message);
+		    this.administrationList();
+		  } else {
+		    this.$message.error(res.message);
+		  }
+		});
+		
     },
     addCurrency() {
       this.dialogFormVisible = false
+	  Api.addArticle(this.form).then((res) => {
+	    if (res.code ==0) {
+	      this.$message.success(res.message);
+	      this.administrationList();
+	    } else {
+	      this.$message.error(res.message);
+	    }
+	  });
     },
     //搜索按钮操作
     handleQuery() {
@@ -259,30 +256,36 @@ export default {
       this.resetForm('queryForm')
       this.handleQuery()
     },
-    handleRemove(file, fileList) {
-      console.log(file, fileList);
-    },
-    handlePictureCardPreview(file) {
-      this.dialogImageUrl = file.url;
-      this.dialogVisible = true;
-    },
-    delClick(row) {//删除
-      this.$confirm('此操作将永久删除该条数据, 是否继续?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-      //.....
-      }).catch(() => {
-        this.$message({
-          type: 'info',
-          message: '已取消删除'
-        })
-      })
-    },
+   //删除
+   delClick(id) {
+     this.$confirm("此操作将永久删除该文件, 是否继续?", "提示", {
+       confirmButtonText: "确定",
+       cancelButtonText: "取消",
+       type: "warning",
+     })
+       .then(() => {
+         Api.delArticle(id).then((res) => {
+           if (res.code ==0) {
+             this.$message.success(res.message);
+             this.administrationList();
+           } else {
+             this.$message.error(res.message);
+           }
+         });
+       })
+       .catch(() => {
+         this.$message({
+           type: "info",
+           message: "已取消删除",
+         });
+       });
+   },
     //列表
     administrationList() {
-    //....
+		Api.getArticle().then((res) => {
+		  this.CurrencyInfo = res.data.list;
+		  this.total = res.data.count;
+		});
     },
   },
   created() {//初始化数据
