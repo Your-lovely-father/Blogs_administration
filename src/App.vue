@@ -1,6 +1,6 @@
 <!--
 @name: App文件
-@description: 主要用于放置路由出口
+@description:主要用于放置路由出口
 @author: ZhiYuanWang
 -->
 <template>
