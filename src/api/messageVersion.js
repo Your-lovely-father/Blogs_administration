@@ -20,7 +20,7 @@ export  default {
 	//回复留言
 	addReply(val){
 	    return Axios.post('/addReplyMessage',{ 
-		_id:val.id,
+		id:val.id,
 		state:val.state,
 		name:val.name,
 		avatar:val.avatar,
